@@ -239,7 +239,7 @@ export async function getDisputeResolutionPercentiles(
       COUNT(*) AS total_count,
       COUNT(CASE WHEN EXTRACT(EPOCH FROM (updated_at - created_at)) * 1000 > $1 THEN 1 END) AS sla_breaches_count
     FROM disputes
-    WHERE status IN ('resolved', 'rejected')
+    WHERE status IN ('resolved', 'rejected', 'reversed', 'upheld')
       AND created_at >= NOW() - INTERVAL '${daysBack} days'
   `;
 
@@ -313,7 +313,7 @@ export async function getDisputeResolutionTrends(
       COUNT(CASE WHEN EXTRACT(EPOCH FROM (updated_at - created_at)) * 1000 > $1 THEN 1 END) AS breach_count,
       COUNT(*) AS total_count
     FROM disputes
-    WHERE status IN ('resolved', 'rejected')
+    WHERE status IN ('resolved', 'rejected', 'reversed', 'upheld')
       AND created_at >= NOW() - INTERVAL '${daysBack} days'
     GROUP BY DATE(created_at)
     ORDER BY date ASC
@@ -382,49 +382,4 @@ export async function invalidateMetricsCache(): Promise<void> {
     redisClient.del(CACHE_KEYS.TRANSACTION_TREND),
     redisClient.del(CACHE_KEYS.DISPUTE_TREND),
   ]);
-}
-// ---------------------------------------------------------------------------
-// System Heartbeat
-// ---------------------------------------------------------------------------
-
-import {
-  systemHeartbeat,
-  systemUptimeSeconds,
-  systemLastHeartbeatTimestamp,
-} from "../utils/metrics";
-
-let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
-
-/**
- * Start the system heartbeat updater.
- * Updates the heartbeat gauge every 15 seconds to signal liveness.
- */
-export function startHeartbeat(intervalMs: number = 15_000): void {
-  if (heartbeatInterval) return;
-
-  systemHeartbeat.set(1);
-  systemUptimeSeconds.set(Math.floor(process.uptime()));
-  systemLastHeartbeatTimestamp.set(Math.floor(Date.now() / 1000));
-
-  heartbeatInterval = setInterval(() => {
-    systemHeartbeat.set(1);
-    systemUptimeSeconds.set(Math.floor(process.uptime()));
-    systemLastHeartbeatTimestamp.set(Math.floor(Date.now() / 1000));
-  }, intervalMs);
-
-  // Allow the process to exit even if the interval is still running
-  if (heartbeatInterval.unref) {
-    heartbeatInterval.unref();
-  }
-}
-
-/**
- * Stop the heartbeat updater and mark the system as down.
- */
-export function stopHeartbeat(): void {
-  if (heartbeatInterval) {
-    clearInterval(heartbeatInterval);
-    heartbeatInterval = null;
-  }
-  systemHeartbeat.set(0);
 }

@@ -134,6 +134,20 @@ export const activeConnections = new Gauge({
   registers: [register],
 });
 
+export const dbReplicaLagSeconds = new Gauge({
+  name: "db_replica_lag_seconds",
+  help: "Replication lag in seconds for each read replica",
+  labelNames: ["replica_url"],
+  registers: [register],
+});
+
+export const dbReplicaReadEnabled = new Gauge({
+  name: "db_replica_read_enabled",
+  help: "Whether the replica is currently enabled for read routing (1=enabled, 0=disabled)",
+  labelNames: ["replica_url"],
+  registers: [register],
+});
+
 export { register };
 
 // Cache Metrics
@@ -174,25 +188,10 @@ export const crossChainAnomalyTotal = new Counter({
   registers: [register],
 });
 
-// System Heartbeat Metrics
+// System Heartbeat Metric
 export const systemHeartbeat = new Gauge({
   name: "system_heartbeat",
-  help: "System heartbeat indicator (1 = alive, 0 = down)",
+  help: "System heartbeat metric indicating baseline availability state (1=available, 0=unavailable)",
+  labelNames: ["service"],
   registers: [register],
 });
-
-export const systemUptimeSeconds = new Gauge({
-  name: "system_uptime_seconds",
-  help: "System uptime in seconds",
-  registers: [register],
-});
-
-export const systemLastHeartbeatTimestamp = new Gauge({
-  name: "system_last_heartbeat_timestamp",
-  help: "Unix timestamp of the last heartbeat",
-  registers: [register],
-});
-
-// Initialize heartbeat to 1 on module load
-systemHeartbeat.set(1);
-systemLastHeartbeatTimestamp.set(Math.floor(Date.now() / 1000));
