@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import fs from "fs";
 
 // Load .momorc from the cli/ directory, fall back to process.env
 const MOMORC_PATH = path.resolve(__dirname, "..", ".momorc");
@@ -12,15 +13,67 @@ export interface CliConfig {
   telemetry: boolean;
 }
 
+export interface Profile {
+  name: string;
+  apiUrl: string;
+  apiKey: string;
+}
+
+export interface ProfilesFile {
+  profiles: Profile[];
+  activeProfile?: string;
+}
+
+const PROFILES_FILE = path.resolve(__dirname, "..", ".momo-profiles.json");
+
+function loadProfiles(): ProfilesFile {
+  if (!fs.existsSync(PROFILES_FILE)) {
+    return { profiles: [] };
+  }
+  try {
+    const content = fs.readFileSync(PROFILES_FILE, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    return { profiles: [] };
+  }
+}
+
+function saveProfiles(data: ProfilesFile): void {
+  fs.writeFileSync(PROFILES_FILE, JSON.stringify(data, null, 2), "utf-8");
+}
+
 export function getConfig(): CliConfig {
-  const apiKey = process.env.MOMO_API_KEY;
+  const profiles = loadProfiles();
+  let apiKey: string | undefined;
+  let apiUrl: string | undefined;
+
+  // If an active profile is set, use it
+  if (profiles.activeProfile) {
+    const activeProfile = profiles.profiles.find(
+      (p) => p.name === profiles.activeProfile,
+    );
+    if (activeProfile) {
+      apiUrl = activeProfile.apiUrl;
+      apiKey = activeProfile.apiKey;
+    }
+  }
+
+  // Fall back to environment variables
+  if (!apiKey) {
+    apiKey = process.env.MOMO_API_KEY;
+  }
+  if (!apiUrl) {
+    apiUrl = process.env.MOMO_API_URL;
+  }
+
   if (!apiKey) {
     throw new Error(
-      "MOMO_API_KEY is required. Set it in cli/.momorc or as an environment variable.",
+      "MOMO_API_KEY is required. Set it in cli/.momorc, as an environment variable, or use 'momo-cli profile save'.",
     );
   }
+
   return {
-    apiUrl: process.env.MOMO_API_URL ?? "http://localhost:3000",
+    apiUrl: apiUrl ?? "http://localhost:3000",
     apiKey,
     telemetry: getTelemetryEnabled(),
   };
