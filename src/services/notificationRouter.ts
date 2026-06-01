@@ -222,12 +222,14 @@ export class NotificationRouter {
           context.transaction,
           context.message,
           context.locale || user.preferredLanguage,
+          user.displayName,
         );
       } else {
         await this.emailService.sendTransactionReceipt(
           user.email,
           context.transaction,
           context.locale || user.preferredLanguage,
+          user.displayName,
         );
       }
     } else {

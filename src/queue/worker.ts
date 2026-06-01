@@ -118,6 +118,7 @@ async function sendTransactionEmail(transactionId: string): Promise<void> {
       user.email,
       transaction,
       user.preferredLanguage,
+      user.displayName,
     );
   }
 }
@@ -138,6 +139,7 @@ async function sendFailureEmail(
       transaction,
       reason,
       user.preferredLanguage,
+      user.displayName,
     );
   }
 }
