@@ -1,3 +1,5 @@
+import { PoolClient } from "pg";
+
 import {
   dbConnectionLeakDetector,
   getConnectionTrackerCount,
@@ -5,9 +7,7 @@ import {
   forceReleaseAllConnections,
   trackConnectionCheckout,
   getTrackedConnections,
-  TrackedConnection,
 } from "../../src/middleware/dbConnectionLeakDetector";
-import { PoolClient } from "pg";
 
 jest.mock("../../src/utils/logger");
 
