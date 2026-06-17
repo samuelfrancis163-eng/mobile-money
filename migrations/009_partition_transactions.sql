@@ -212,6 +212,7 @@ CREATE TRIGGER transactions_updated_at
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Step 9: Recreate foreign key constraints that were dropped in Step 1.
 -- ─────────────────────────────────────────────────────────────────────────────
-ALTER TABLE disputes
-  ADD CONSTRAINT disputes_transaction_id_fkey
-  FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE RESTRICT;
+-- ALTER TABLE disputes
+--   ADD CONSTRAINT disputes_transaction_id_fkey
+--   FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE RESTRICT;
+

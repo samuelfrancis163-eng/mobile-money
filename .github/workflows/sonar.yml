@@ -73,6 +73,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
           STELLAR_ISSUER_SECRET: S-DUMMY-SECRET-KEY-FOR-TESTING-PURPOSES-ONLY
           NODE_ENV: test
+          NODE_OPTIONS: --experimental-vm-modules
           CI: true
 
       - name: Check if SonarCloud is configured

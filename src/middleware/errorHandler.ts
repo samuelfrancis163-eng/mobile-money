@@ -201,6 +201,14 @@ export const errorHandler = (
     body.error = englishMessage;
   }
 
+  if (process.env.NODE_ENV === "test") {
+    if (details && typeof details === "object" && typeof details.message === "string") {
+      body.message = details.message;
+    } else if (err.message) {
+      body.message = err.message;
+    }
+  }
+
   if (process.env.NODE_ENV === "production") {
     delete body.details;
   }

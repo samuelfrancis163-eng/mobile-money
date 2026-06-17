@@ -1,32 +1,46 @@
 import request from "supertest";
 import express from "express";
-import { merchantRoutes } from "../merchants";
-import { MerchantService } from "../../services/merchantService";
-import { MerchantModel, CreateMerchantInput } from "../../models/merchant";
 
-// Mock the MerchantService
-jest.mock("../../services/merchantService");
+// Create the mock service object at module level
+const mockMerchantService = {
+  createMerchant: jest.fn(),
+  bulkCreateMerchants: jest.fn(),
+  getBatchJobStatus: jest.fn(),
+  listMerchants: jest.fn(),
+  getMerchant: jest.fn(),
+  acceptInvitation: jest.fn(),
+};
+
+// Mock MerchantService to return mockMerchantService
+jest.mock("../../services/merchantService", () => ({
+  MerchantService: jest.fn().mockImplementation(() => mockMerchantService),
+}));
+
+// Mock authenticateToken middleware to set user and proceed
+jest.mock("../../middleware/auth", () => ({
+  authenticateToken: jest.fn((req, res, next) => {
+    req.user = { id: "admin-123", role: "admin" };
+    next();
+  }),
+}));
+
+import { merchantRoutes } from "../merchants";
+import { CreateMerchantInput } from "../../models/merchant";
 
 describe("Merchant Routes", () => {
   let app: express.Express;
-  let mockMerchantService: jest.Mocked<MerchantService>;
 
   beforeEach(() => {
     app = express();
     app.use(express.json());
     
-    // Create mock service instance
-    mockMerchantService = {
-      createMerchant: jest.fn(),
-      bulkCreateMerchants: jest.fn(),
-      getBatchJobStatus: jest.fn(),
-      listMerchants: jest.fn(),
-      getMerchant: jest.fn(),
-      acceptInvitation: jest.fn(),
-    } as any;
-
-    // Replace the service in the routes
-    (MerchantService as jest.Mock).mockImplementation(() => mockMerchantService);
+    // Reset mock implementations and calls
+    mockMerchantService.createMerchant.mockReset();
+    mockMerchantService.bulkCreateMerchants.mockReset();
+    mockMerchantService.getBatchJobStatus.mockReset();
+    mockMerchantService.listMerchants.mockReset();
+    mockMerchantService.getMerchant.mockReset();
+    mockMerchantService.acceptInvitation.mockReset();
     
     app.use("/api/merchants", merchantRoutes);
   });

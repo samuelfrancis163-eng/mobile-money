@@ -99,3 +99,14 @@ try {
   console.error("Failed to patch Express for async errors in tests:", e);
 }
 
+import { connectRedis, disconnectRedis } from "../src/config/redis";
+
+beforeAll(async () => {
+  await connectRedis();
+});
+
+afterAll(async () => {
+  await disconnectRedis();
+});
+
+

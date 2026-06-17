@@ -1627,8 +1627,12 @@ router.post(
         message: "Reconciliation completed successfully",
         result,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("[CSV RECONCILIATION ERROR]", error);
+
+      if (error.statusCode) {
+        throw error;
+      }
 
       if (error instanceof Error) {
         throw createError(ERROR_CODES.INTERNAL_ERROR, "Reconciliation failed", {
@@ -2545,6 +2549,9 @@ router.get(
       });
     } catch (error) {
       console.error("[compliance/docs:list]", error);
+      if ((error as any).statusCode) {
+        throw error;
+      }
       throw createError(
         ERROR_CODES.INTERNAL_ERROR,
         "Failed to list compliance documents",
@@ -2590,6 +2597,9 @@ router.get(
       res.json(document);
     } catch (error) {
       console.error("[compliance/docs:get]", error);
+      if ((error as any).statusCode) {
+        throw error;
+      }
       throw createError(
         ERROR_CODES.INTERNAL_ERROR,
         "Failed to fetch compliance document",
@@ -2620,6 +2630,9 @@ router.post(
       res.status(201).json(document);
     } catch (error) {
       console.error("[compliance/docs:create]", error);
+      if ((error as any).statusCode) {
+        throw error;
+      }
       throw createError(
         ERROR_CODES.INTERNAL_ERROR,
         "Failed to create compliance document",
@@ -2660,6 +2673,9 @@ router.patch(
       res.json(document);
     } catch (error) {
       console.error("[compliance/docs:update]", error);
+      if ((error as any).statusCode) {
+        throw error;
+      }
       throw createError(
         ERROR_CODES.INTERNAL_ERROR,
         "Failed to update compliance document",
@@ -2922,6 +2938,9 @@ router.delete(
       res.json(document);
     } catch (error) {
       console.error("[compliance/docs:archive]", error);
+      if ((error as any).statusCode) {
+        throw error;
+      }
       throw createError(
         ERROR_CODES.INTERNAL_ERROR,
         "Failed to archive compliance document",

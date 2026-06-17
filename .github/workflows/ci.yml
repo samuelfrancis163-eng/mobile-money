@@ -190,12 +190,14 @@ jobs:
           REDIS_URL: redis://localhost:6379
           STELLAR_ISSUER_SECRET: S-DUMMY-SECRET-KEY-FOR-TESTING-PURPOSES-ONLY
           NODE_ENV: test
+          NODE_OPTIONS: --experimental-vm-modules
           CI: true
 
       - name: Run Pact Contract Tests
         run: npm run test:pact
         continue-on-error: false
         env:
+          NODE_OPTIONS: --experimental-vm-modules
           CI: true
 
       - name: Upload Pact files as artifacts
