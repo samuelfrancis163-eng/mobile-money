@@ -1,4 +1,5 @@
 #![no_std]
+#![allow(clippy::too_many_arguments)]
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, BytesN, Env, Vec};
 
@@ -50,19 +51,15 @@ impl HtlcContract {
         );
 
         // Validate multi-sig parameters if provided
-        if approved_signers.len() > 0 {
+        if !approved_signers.is_empty() {
             assert!(
-                required_signatures > 0 && required_signatures <= approved_signers.len() as u32,
+                required_signatures > 0 && required_signatures <= approved_signers.len(),
                 "required_signatures must be between 1 and number of approved signers"
             );
         }
 
         // Pull funds from the sender into this contract.
-        token::Client::new(&env, &token).transfer(
-            &sender,
-            &env.current_contract_address(),
-            &amount,
-        );
+        token::Client::new(&env, &token).transfer(&sender, env.current_contract_address(), &amount);
 
         env.storage().instance().set(
             &HTLC,
@@ -101,7 +98,7 @@ impl HtlcContract {
         assert!(hash == state.hashlock, "invalid preimage");
 
         // Multi-signature verification if approved signers are configured
-        if state.approved_signers.len() > 0 {
+        if !state.approved_signers.is_empty() {
             // Verify each signer is in the approved list and has authorized
             let mut valid_signature_count = 0u32;
             for signer in signers.iter() {

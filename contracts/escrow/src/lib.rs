@@ -1,4 +1,5 @@
 #![no_std]
+#![allow(clippy::too_many_arguments)]
 
 use soroban_sdk::{contract, contracterror, contractimpl, contracttype, token, Address, Env};
 
@@ -120,7 +121,7 @@ impl EscrowContract {
         // Pull funds from depositor into the contract.
         token::Client::new(&env, &token).transfer(
             &depositor,
-            &env.current_contract_address(),
+            env.current_contract_address(),
             &amount,
         );
 
@@ -337,6 +338,7 @@ mod tests {
     }
 
     // Helper: initialise with common defaults
+    #[allow(clippy::too_many_arguments)]
     fn init(
         client: &EscrowContractClient,
         depositor: &Address,
